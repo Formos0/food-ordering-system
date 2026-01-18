@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เลือกร้าน</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .shop-card {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .shop-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    }
+    .shop-card h3 {
+      color: var(--primary);
+      margin-bottom: 10px;
+      font-size: 1.5em;
+    }
+    .shop-card p { color: #666; margin-bottom: 15px; }
+    .shop-card a {
+      display: inline-block;
+      padding: 10px 20px;
+      background: var(--primary);
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    .shop-card a:hover {
+      background: var(--primary-dark);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>👨‍🍳 แดชบอร์ดแม่ค้า</h1>
+      <p style="color: rgba(255,255,255,0.9);">เลือกร้านของคุณเพื่อจัดการออเดอร์</p>
+    </header>
+
+    <div class="shop-grid" id="shopGrid"></div>
+
+    <div style="text-align: center; margin-top: 30px;">
+      <a href="../index.html" class="btn btn-primary" style="text-decoration: none;">← กลับหน้าแรก</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { getAllRestaurants } from "../js/restaurants.js";
+
+    function renderShops() {
+      const container = document.getElementById('shopGrid');
+      const restaurants = getAllRestaurants();
+      
+      let html = '';
+      restaurants.forEach(shop => {
+        html += `
+          <div class="shop-card">
+            <h3>🏪 ${shop.name}</h3>
+            <p style="font-size: 0.9em; color: #999;">📍 ${shop.building}</p>
+            <p>${shop.items.length} รายการเมนู</p>
+            <a href="shop.html?shop=${encodeURIComponent(shop.name)}">
+              เข้าจัดการ →
+            </a>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    renderShops();
+  </script>
+</body>
+</html>

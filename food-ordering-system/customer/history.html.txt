@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ประวัติการสั่ง</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📜 ประวัติการสั่งอาหาร</h1>
+    </header>
+
+    <div style="display: grid; gap: 15px;">
+      <a href="order.html" class="btn btn-primary" style="text-decoration: none; text-align: center;">← กลับไปสั่งอาหาร</a>
+      <div id="historyContainer">
+        <p style="text-align: center; color: #999; padding: 40px;">⏳ กำลังโหลด...</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { listenToOrders, updateOrderStatus } from "../js/database.js";
+
+    let customerId = localStorage.getItem('customerId') || 'default';
+    let unsubscribe;
+
+    function startListening() {
+      unsubscribe = listenToOrders((orders) => {
+        const container = document.getElementById('historyContainer');
+        const myOrders = orders.filter(o => o.customerId === customerId);
+
+        if (myOrders.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">ยังไม่มีประวัติการสั่ง</p>';
+          return;
+        }
+
+        const statusTexts = {
+          'pending': '🕐 รอดำเนินการ',
+          'accepted': '✅ แม่ค้ารับแล้ว',
+          'preparing': '👨‍🍳 กำลังทำ',
+          'ready': '🎉 พร้อมรับ',
+          'picked': '🎁 ลูกค้ารับไปแล้ว',
+          'rejected': '❌ ถูกปฏิเสธ'
+        };
+
+        let html = '';
+        myOrders.forEach(order => {
+          const canCancel = order.status === 'pending';
+          const createdAt = new Date(order.createdAt?.toDate?.() || order.createdAt).toLocaleString('th-TH');
+
+          let itemsHtml = order.items.map(item => `
+            <div style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+              <div style="font-weight: bold; color: var(--primary);">🏪 ${item.restaurant}</div>
+              <div style="color: #666; margin-left: 10px;">${item.item} × ${item.qty} = ${item.subtotal}฿</div>
+            </div>
+          `).join('');
+
+          html += `
+            <div class="card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                <div>
+                  <div style="font-weight: bold; font-size: 1.2em; color: var(--dark);">ออเดอร์ #${order.id?.substring(0, 8) || 'N/A'}</div>
+                  <div style="font-size: 0.85em; color: #999;">${createdAt}</div>
+                </div>
+                <span class="status-badge status-${order.status}">${statusTexts[order.status]}</span>
+              </div>
+
+              <div style="background: var(--light); padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+                ${itemsHtml}
+              </div>
+
+              <div style="font-weight: bold; color: var(--dark); font-size: 1.1em; margin-bottom: 15px;">
+                💰 รวม: ${order.total}฿
+              </div>
+
+              <div>
+                ${canCancel ? `
+                  <button onclick="cancelOrder('${order.id}')" class="btn btn-danger" style="width: 100%;">
+                    ❌ ยกเลิกออเดอร์
+                  </button>
+                ` : `
+                  <button disabled class="btn" style="width: 100%; background: #ccc; cursor: not-allowed;">
+                    ${order.status === 'rejected' ? 'ถูกปฏิเสธแล้ว' : 'ไม่สามารถยกเลิกได้'}
+                  </button>
+                `}
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+      });
+    }
+
+    window.cancelOrder = async function(orderId) {
+      if (!confirm('ยกเลิกออเดอร์นี้หรือไม่?')) return;
+      try {
+        await updateOrderStatus(orderId, 'rejected');
+        alert('✅ ยกเลิกออเดอร์แล้ว');
+      } catch (error) {
+        alert('❌ เกิดข้อผิดพลาด: ' + error.message);
+      }
+    };
+
+    startListening();
+
+    window.addEventListener('beforeunload', () => {
+      if (unsubscribe) unsubscribe();
+    });
+  </script>
+</body>
+</html>
