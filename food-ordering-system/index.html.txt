@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบสั่งอาหาร</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #667eea;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .restaurants {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .restaurant {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .restaurant h3 {
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .menu-items {
+            display: grid;
+            gap: 8px;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 6px;
+        }
+
+        .item-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .item-price {
+            color: #667eea;
+            font-weight: bold;
+            margin: 0 15px;
+        }
+
+        .btn-add {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-add:hover {
+            background: #764ba2;
+        }
+
+        .cart {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .cart h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .cart-items {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 15px;
+            min-height: 100px;
+        }
+
+        .cart-item {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            font-size: 0.9em;
+            border-left: 4px solid #667eea;
+        }
+
+        .cart-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .restaurant-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .dish-name {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .item-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quantity-control {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .quantity-control button {
+            background: #667eea;
+            color: white;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .quantity-control button:hover {
+            background: #764ba2;
+        }
+
+        .quantity-display {
+            width: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .item-total {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .btn-remove {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75em;
+        }
+
+        .btn-remove:hover {
+            background: #ee5a52;
+        }
+
+        .cart-summary {
+            border-top: 2px solid #e0e0e0;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .btn-order {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.05em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .btn-order:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-order:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #999;
+            padding: 30px 10px;
+        }
+
+        .history-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .history-container h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .order-history-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .history-card {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .order-id {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .order-time {
+            font-size: 0.85em;
+            color: #999;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .status-pending {
+            background: #f59e0b;
+        }
+
+        .status-accepted {
+            background: #3b82f6;
+        }
+
+        .status-preparing {
+            background: #8b5cf6;
+        }
+
+        .status-ready {
+            background: #22c55e;
+        }
+
+        .status-picked {
+            background: #10b981;
+        }
+
+        .status-rejected {
+            background: #ef4444;
+        }
+
+        .history-items {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border: 1px solid #e0e0e0;
+            font-size: 0.9em;
+        }
+
+        .history-item {
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-item-shop {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .history-item-detail {
+            color: #666;
+            margin-left: 10px;
+            font-size: 0.95em;
+        }
+
+        .history-total {
+            font-weight: bold;
+            color: #333;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-cancel {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .btn-cancel:hover:not(:disabled) {
+            background: #ee5a52;
+        }
+
+        .btn-cancel:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Vendor Section */
+        .vendor-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .vendor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .vendor-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-box.pending {
+            border-left-color: #f59e0b;
+        }
+
+        .stat-box.pending .stat-value {
+            color: #f59e0b;
+        }
+
+        .stat-box.preparing {
+            border-left-color: #8b5cf6;
+        }
+
+        .stat-box.preparing .stat-value {
+            color: #8b5cf6;
+        }
+
+        .stat-box.ready {
+            border-left-color: #22c55e;
+        }
+
+        .stat-box.ready .stat-value {
+            color: #22c55e;
+        }
+
+        .vendor-section-title {
+            color: #333;
+            margin: 30px 0 20px 0;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .order-card {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #f59e0b;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .order-card.accepted {
+            border-left-color: #3b82f6;
+        }
+
+        .order-card.preparing {
+            border-left-color: #8b5cf6;
+        }
+
+        .order-card.ready {
+            border-left-color: #22c55e;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .order-items {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .order-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.9em;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-item-detail {
+            color: #666;
+            margin: 4px 0;
+            margin-left: 10px;
+        }
+
+        .order-total {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .order-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .btn-status {
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85em;
+            transition: all 0.3s;
+        }
+
+        .btn-accept {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-accept:hover {
+            background: #2563eb;
+        }
+
+        .btn-preparing {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .btn-preparing:hover {
+            background: #7c3aed;
+        }
+
+        .btn-ready {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-ready:hover {
+            background: #16a34a;
+        }
+
+        .btn-picked {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-picked:hover {
+            background: #059669;
+        }
+
+        .btn-reject {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background: #dc2626;
+        }
+
+        .no-orders {
+            text-align: center;
+            color: #999;
+            padding: 60px 20px;
+            font-size: 1.1em;
+        }
+
+        .btn-clear-all {
+            background: #ff6b6b;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-clear-all:hover {
+            background: #ee5a52;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .cart {
+                position: static;
+            }
+
+            .restaurants {
+                grid-template-columns: 1fr;
+            }
+
+            .orders-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .vendor-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍽️ ระบบสั่งอาหาร</h1>
+            <p style="color: rgba(255,255,255,0.9); margin-top: 5px;">บันทึกข้อมูลถาวร - ไม่ต้องกังวลเมื่อปิดหน้าเว็บ</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('customer-order')">🛒 สั่งอาหาร</button>
+            <button class="tab-btn" onclick="switchTab('customer-history')">📜 ประวัติการสั่ง</button>
+            <button class="tab-btn" onclick="switchTab('vendor-active')">👨‍🍳 แม่ค้า (ออเดอร์ค้าง)</button>
+            <button class="tab-btn" onclick="switchTab('vendor-history')">📋 แม่ค้า (ประวัติ)</button>
+        </div>
+
+        <!-- ===== CUSTOMER ORDER TAB ===== -->
+        <div id="customer-order" class="tab-content active">
+            <div class="content">
+                <div class="restaurants" id="restaurantsContainer"></div>
+                
+                <div class="cart">
+                    <h2>🛒 ตะกร้าของคุณ</h2>
+                    <div class="cart-items" id="cartItems">
+                        <div class="empty-message">ยังไม่มีการสั่งอาหาร</div>
+                    </div>
+                    <div class="cart-summary">
+                        <div class="summary-row">
+                            <span>รวมทั้งสิ้น:</span>
+                            <span id="totalPrice">0฿</span>
+                        </div>
+                        <button class="btn-order" id="orderBtn" disabled>ยืนยันการสั่ง</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== CUSTOMER HISTORY TAB ===== -->
+        <div id="customer-history" class="tab-content">
+            <div class="history-container">
+                <h2>📜 ประวัติการสั่งอาหาร</h2>
+                <div id="customerHistoryList">
+                    <div class="empty-message">ยังไม่มีประวัติการสั่ง</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== VENDOR ACTIVE ORDERS TAB ===== -->
+        <div id="vendor-active" class="tab-content">
+            <div class="vendor-container">
+                <div class="vendor-header">
+                    <h2 style="color: #333;">📋 ออเดอร์ค้าง</h2>
+                    <button class="btn-clear-all" onclick="clearAllOrders()">🗑️ ล้างออเดอร์ทั้งหมด</button>
+                </div>
+
+                <div class="vendor-stats">
+                    <div class="stat-box pending">
+                        <div class="stat-label">รอดำเนินการ</div>
+                        <div class="stat-value" id="statPending">0</div>
+                    </div>
+                    <div class="stat-box preparing">
+                        <div class="stat-label">กำลังทำ</div>
+                        <div class="stat-value" id="statPreparing">0</div>
+                    </div>
+                    <div class="stat-box ready">
+                        <div class="stat-label">พร้อมรับ</div>
+                        <div class="stat-value" id="statReady">0</div>
+                    </div>
+                </div>
+
+                <div class="orders-grid" id="ordersContainer">
+                    <div class="no-orders">ยังไม่มีออเดอร์</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== VENDOR HISTORY TAB ===== -->
+        <div id="vendor-history" class="tab-content">
+            <div class="vendor-container">
+                <h2>📋 ประวัติการจัดการออเดอร์</h2>
+                <div id="vendorHistoryList">
+                    <div class="empty-message">ยังไม่มีประวัติ</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== ข้อมูลร้าน =====
+        const restaurants = [
+            // 🏢 ตึก 1
+            { building: "ตึก 1", name: "ร้านน้ำแข็งใส", items: [
+                { name: "ขนมหวาน", price: 10 },
+                { name: "ข้าวโพดอบเนย", price: 10 },
+                { name: "ขนมปังปิ้ง", price: 10 },
+                { name: "ไข่ม้วน", price: 10 },
+                { name: "ผลไม้", price: 10 }
+            ]},
+            { building: "ตึก 1", name: "กุหลาบขาว (ก๋วยเตี๋ยว)", items: [
+                { name: "น้ำตก (ธรรมดา)", price: 25 },
+                { name: "น้ำตก (พิเศษ)", price: 30 },
+                { name: "น้ำใส (ธรรมดา)", price: 25 },
+                { name: "น้ำใส (พิเศษ)", price: 30 },
+                { name: "ต้มยำ (ธรรมดา)", price: 25 },
+                { name: "ต้มยำ (พิเศษ)", price: 30 },
+                { name: "เย็นตาโฟ (ธรรมดา)", price: 25 },
+                { name: "เย็นตาโฟ (พิเศษ)", price: 30 }
+            ]},
+            { building: "ตึก 1", name: "กุหลาบน้ำตาล (อาหารจานเดียว)", items: [
+                { name: "ข้าวขาหมู (ธรรมดา)", price: 25 },
+                { name: "ข้าวขาหมู (พิเศษ)", price: 30 },
+                { name: "ข้าวหมูแดง (ธรรมดา)", price: 25 },
+                { name: "ข้าวหมูแดง (พิเศษ)", price: 30 },
+                { name: "ราดหน้า (ธรรมดา)", price: 25 },
+                { name: "ราดหน้า (พิเศษ)", price: 30 },
+                { name: "ส้มตำ (ธรรมดา)", price: 25 },
+                { name: "ส้มตำ (พิเศษ)", price: 30 },
+                { name: "ผัดไทย (ธรรมดา)", price: 25 },
+                { name: "ผัดไทย (พิเศษ)", price: 30 },
+                { name: "ขนมจีน (ธรรมดา)", price: 25 },
+                { name: "ขนมจีน (พิเศษ)", price: 30 },
+                { name: "ยำมาม่า (ธรรมดา)", price: 25 },
+                { name: "ยำมาม่า (พิเศษ)", price: 30 }
+            ]},
+            { building: "ตึก 1", name: "ร้านข้าวไก่กรอบ", items: [
+                { name: "ข้าวไก่กรอบ", price: 25 },
+                { name: "ข้าวยำไก่แซ่บ", price: 30 },
+                { name: "ข้าวปลากรอบ", price: 27 },
+                { name: "ข้าวกระเพราไก่กรอบ", price: 28 },
+                { name: "ข้าวไก่เทริยากิ", price: 30 }
+            ]},
+            { building: "ตึก 1", name: "กุหลาบทอง (ข้าวราดแกง)", items: [
+                { name: "กุนเชียง 1 อย่าง", price: 25 },
+                { name: "กุนเชียง 2 อย่าง", price: 30 },
+                { name: "กุนเชียง 3 อย่าง", price: 40 },
+                { name: "พะโล้ 1 อย่าง", price: 25 },
+                { name: "พะโล้ 2 อย่าง", price: 30 },
+                { name: "พะโล้ 3 อย่าง", price: 40 },
+                { name: "พะแนง 1 อย่าง", price: 25 },
+                { name: "พะแนง 2 อย่าง", price: 30 },
+                { name: "พะแนง 3 อย่าง", price: 40 },
+                { name: "กระเพรา 1 อย่าง", price: 25 },
+                { name: "กระเพรา 2 อย่าง", price: 30 },
+                { name: "กระเพรา 3 อย่าง", price: 40 },
+                { name: "คั่วกลิ้ง 1 อย่าง", price: 25 },
+                { name: "คั่วกลิ้ง 2 อย่าง", price: 30 },
+                { name: "คั่วกลิ้ง 3 อย่าง", price: 40 },
+                { name: "แกงเขียวหวาน 1 อย่าง", price: 25 },
+                { name: "แกงเขียวหวาน 2 อย่าง", price: 30 },
+                { name: "แกงเขียวหวาน 3 อย่าง", price: 40 },
+                { name: "ไข่ตุ๋น 1 อย่าง", price: 25 },
+                { name: "ไข่ตุ๋น 2 อย่าง", price: 30 },
+                { name: "ไข่ตุ๋น 3 อย่าง", price: 40 },
+                { name: "ต้มข่าไก่ 1 อย่าง", price: 25 },
+                { name: "ต้มข่าไก่ 2 อย่าง", price: 30 },
+                { name: "ต้มข่าไก่ 3 อย่าง", price: 40 },
+                { name: "ข้าวผัด 1 อย่าง", price: 25 },
+                { name: "ข้าวผัด 2 อย่าง", price: 30 },
+                { name: "ข้าวผัด 3 อย่าง", price: 40 },
+                { name: "โจ๊ก 1 อย่าง", price: 25 },
+                { name: "โจ๊ก 2 อย่าง", price: 30 },
+                { name: "โจ๊ก 3 อย่าง", price: 40 },
+                { name: "ฮอทดอก 1 อย่าง", price: 25 },
+                { name: "ฮอทดอก 2 อย่าง", price: 30 },
+                { name: "ฮอทดอก 3 อย่าง", price: 40 }
+            ]},
+            // 🏢 ตึก 5
+            { building: "ตึก 5", name: "SKC1 (ข้าวเหนียว)", items: [
+                { name: "ข้าวเหนียวหมู 1 อย่าง", price: 20 },
+                { name: "ข้าวเหนียวหมู 2 อย่าง", price: 25 },
+                { name: "ข้าวเหนียวหมู 3 อย่าง", price: 30 },
+                { name: "หมูหวาน 1 อย่าง", price: 20 },
+                { name: "หมูหวาน 2 อย่าง", price: 25 },
+                { name: "หมูหวาน 3 อย่าง", price: 30 },
+                { name: "หมูฝอย 1 อย่าง", price: 20 },
+                { name: "หมูฝอย 2 อย่าง", price: 25 },
+                { name: "หมูฝอย 3 อย่าง", price: 30 },
+                { name: "หมูทอด 1 อย่าง", price: 20 },
+                { name: "หมูทอด 2 อย่าง", price: 25 },
+                { name: "หมูทอด 3 อย่าง", price: 30 },
+                { name: "ไก่ 1 อย่าง", price: 20 },
+                { name: "ไก่ 2 อย่าง", price: 25 },
+                { name: "ไก่ 3 อย่าง", price: 30 }
+            ]},
+            { building: "ตึก 5", name: "SKC2", items: [
+                { name: "ผัดกระเพราไก่ (ธรรมดา)", price: 25 },
+                { name: "ผัดกระเพราไก่ (พิเศษ)", price: 30 },
+                { name: "ผัดกระเพราไก่ + ไข่ดาว", price: 30 },
+                { name: "ผัดกระเพราไก่ + ไข่เจียว", price: 30 },
+                { name: "ผัดกระเพราหมูสับ (ธรรมดา)", price: 25 },
+                { name: "ผัดกระเพราหมูสับ (พิเศษ)", price: 30 },
+                { name: "ผัดกระเพราหมูสับ + ไข่ดาว", price: 30 },
+                { name: "ผัดกระเพราหมูสับ + ไข่เจียว", price: 30 }
+            ]},
+            { building: "ตึก 5", name: "SKC3", items: [
+                { name: "ไก่ทอด", price: 10 },
+                { name: "นักเก็ต", price: 10 },
+                { name: "เฟรนช์ฟราย", price: 10 },
+                { name: "ปูอัด", price: 10 },
+                { name: "โตเกียว", price: 10 },
+                { name: "ไก่เกาหลี", price: 10 }
+            ]},
+            { building: "ตึก 5", name: "SKC4", items: [
+                { name: "น้ำแข็งใส", price: 20 },
+                { name: "ขนมปังปิ้ง", price: 10 },
+                { name: "ผลไม้", price: 10 }
+            ]},
+            { building: "ตึก 5", name: "SKC5", items: [
+                { name: "หมาล่า", price: 10 },
+                { name: "ลูกชิ้นนึ่ง", price: 10 }
+            ]},
+            { building: "ตึก 5", name: "SKC6 (ข้าวราดแกง)", items: [
+                { name: "ไข่ดาว 1 อย่าง", price: 25 },
+                { name: "ไข่ดาว 2 อย่าง", price: 30 },
+                { name: "ไข่ดาว 3 อย่าง", price: 40 },
+                { name: "แกงเขียวหวาน 1 อย่าง", price: 25 },
+                { name: "แกงเขียวหวาน 2 อย่าง", price: 30 },
+                { name: "แกงเขียวหวาน 3 อย่าง", price: 40 },
+                { name: "พะโล้ 1 อย่าง", price: 25 },
+                { name: "พะโล้ 2 อย่าง", price: 30 },
+                { name: "พะโล้ 3 อย่าง", price: 40 },
+                { name: "ผัดผัก 1 อย่าง", price: 25 },
+                { name: "ผัดผัก 2 อย่าง", price: 30 },
+                { name: "ผัดผัก 3 อย่าง", price: 40 },
+                { name: "พะแนง 1 อย่าง", price: 25 },
+                { name: "พะแนง 2 อย่าง", price: 30 },
+                { name: "พะแนง 3 อย่าง", price: 40 },
+                { name: "ทอดมัน 1 อย่าง", price: 25 },
+                { name: "ทอดมัน 2 อย่าง", price: 30 },
+                { name: "ทอดมัน 3 อย่าง", price: 40 },
+                { name: "ไส้กรอก 1 อย่าง", price: 25 },
+                { name: "ไส้กรอก 2 อย่าง", price: 30 },
+                { name: "ไส้กรอก 3 อย่าง", price: 40 },
+                { name: "หมูยอ 1 อย่าง", price: 25 },
+                { name: "หมูยอ 2 อย่าง", price: 30 },
+                { name: "หมูยอ 3 อย่าง", price: 40 }
+            ]},
+            { building: "ตึก 5", name: "SKC7", items: [
+                { name: "ข้าวมันไก่ต้ม (ธรรมดา)", price: 25 },
+                { name: "ข้าวมันไก่ต้ม (พิเศษ)", price: 30 },
+                { name: "ข้าวมันไก่ทอด (ธรรมดา)", price: 25 },
+                { name: "ข้าวมันไก่ทอด (พิเศษ)", price: 30 },
+                { name: "สปาเก็ตตี้คาโบนาร่า (ธรรมดา)", price: 25 },
+                { name: "สปาเก็ตตี้คาโบนาร่า (พิเศษ)", price: 30 },
+                { name: "สปาเก็ตตี้ซอสมะเขือเทศ (ธรรมดา)", price: 25 },
+                { name: "สปาเก็ตตี้ซอสมะเขือเทศ (พิเศษ)", price: 30 }
+            ]},
+            { building: "ตึก 5", name: "SKC8 (ก๋วยเตี๋ยว)", items: [
+                { name: "เส้นเล็ก + น้ำตก (ธรรมดา)", price: 25 },
+                { name: "เส้นเล็ก + น้ำตก (พิเศษ)", price: 30 },
+                { name: "เส้นเล็ก + น้ำใส (ธรรมดา)", price: 25 },
+                { name: "เส้นเล็ก + น้ำใส (พิเศษ)", price: 30 },
+                { name: "เส้นเล็ก + เย็นตาโฟ (ธรรมดา)", price: 25 },
+                { name: "เส้นเล็ก + เย็นตาโฟ (พิเศษ)", price: 30 },
+                { name: "เส้นเล็ก + ต้มยำ (ธรรมดา)", price: 25 },
+                { name: "เส้นเล็ก + ต้มยำ (พิเศษ)", price: 30 },
+                { name: "วุ้นเส้น + น้ำตก (ธรรมดา)", price: 25 },
+                { name: "วุ้นเส้น + น้ำตก (พิเศษ)", price: 30 },
+                { name: "วุ้นเส้น + น้ำใส (ธรรมดา)", price: 25 },
+                { name: "วุ้นเส้น + น้ำใส (พิเศษ)", price: 30 },
+                { name: "วุ้นเส้น + เย็นตาโฟ (ธรรมดา)", price: 25 },
+                { name: "วุ้นเส้น + เย็นตาโฟ (พิเศษ)", price: 30 },
+                { name: "วุ้นเส้น + ต้มยำ (ธรรมดา)", price: 25 },
+                { name: "วุ้นเส้น + ต้มยำ (พิเศษ)", price: 30 },
+                { name: "มาม่า + น้ำตก (ธรรมดา)", price: 25 },
+                { name: "มาม่า + น้ำตก (พิเศษ)", price: 30 },
+                { name: "มาม่า + น้ำใส (ธรรมดา)", price: 25 },
+                { name: "มาม่า + น้ำใส (พิเศษ)", price: 30 },
+                { name: "มาม่า + เย็นตาโฟ (ธรรมดา)", price: 25 },
+                { name: "มาม่า + เย็นตาโฟ (พิเศษ)", price: 30 },
+                { name: "มาม่า + ต้มยำ (ธรรมดา)", price: 25 },
+                { name: "มาม่า + ต้มยำ (พิเศษ)", price: 30 },
+                { name: "หมี่ขาว + น้ำตก (ธรรมดา)", price: 25 },
+                { name: "หมี่ขาว + น้ำตก (พิเศษ)", price: 30 },
+                { name: "หมี่ขาว + น้ำใส (ธรรมดา)", price: 25 },
+                { name: "หมี่ขาว + น้ำใส (พิเศษ)", price: 30 },
+                { name: "หมี่ขาว + เย็นตาโฟ (ธรรมดา)", price: 25 },
+                { name: "หมี่ขาว + เย็นตาโฟ (พิเศษ)", price: 30 },
+                { name: "หมี่ขาว + ต้มยำ (ธรรมดา)", price: 25 },
+                { name: "หมี่ขาว + ต้มยำ (พิเศษ)", price: 30 },
+                { name: "บะหมี่ + น้ำตก (ธรรมดา)", price: 25 },
+                { name: "บะหมี่ + น้ำตก (พิเศษ)", price: 30 },
+                { name: "บะหมี่ + น้ำใส (ธรรมดา)", price: 25 },
+                { name: "บะหมี่ + น้ำใส (พิเศษ)", price: 30 },
+                { name: "บะหมี่ + เย็นตาโฟ (ธรรมดา)", price: 25 },
+                { name: "บะหมี่ + เย็นตาโฟ (พิเศษ)", price: 30 },
+                { name: "บะหมี่ + ต้มยำ (ธรรมดา)", price: 25 },
+                { name: "บะหมี่ + ต้มยำ (พิเศษ)", price: 30 },
+                { name: "เส้นใหญ่ + น้ำตก (ธรรมดา)", price: 25 },
+                { name: "เส้นใหญ่ + น้ำตก (พิเศษ)", price: 30 },
+                { name: "เส้นใหญ่ + น้ำใส (ธรรมดา)", price: 25 },
+                { name: "เส้นใหญ่ + น้ำใส (พิเศษ)", price: 30 },
+                { name: "เส้นใหญ่ + เย็นตาโฟ (ธรรมดา)", price: 25 },
+                { name: "เส้นใหญ่ + เย็นตาโฟ (พิเศษ)", price: 30 },
+                { name: "เส้นใหญ่ + ต้มยำ (ธรรมดา)", price: 25 },
+                { name: "เส้นใหญ่ + ต้มยำ (พิเศษ)", price: 30 }
+            ]}
+        ];
+
+        // ===== ตัวแปรเก็บข้อมูล =====
+        let cart = [];
+        let orders = [];
+        let nextOrderId = 1001;
+
+        // ===== โหลดข้อมูลจากคอมพิวเตอร์เมื่อเปิดหน้าเว็บ =====
+        function loadData() {
+            const savedOrders = localStorage.getItem('foodOrders');
+            const savedOrderId = localStorage.getItem('nextOrderId');
+            
+            if (savedOrders) {
+                orders = JSON.parse(savedOrders);
+            }
+            if (savedOrderId) {
+                nextOrderId = parseInt(savedOrderId);
+            }
+        }
+
+        // ===== บันทึกข้อมูลลงคอมพิวเตอร์ =====
+        function saveData() {
+            localStorage.setItem('foodOrders', JSON.stringify(orders));
+            localStorage.setItem('nextOrderId', nextOrderId.toString());
+        }
+
+        // ===== สลับแท็บ =====
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'customer-history') {
+                renderCustomerHistory();
+            } else if (tabName === 'vendor-active') {
+                updateVendorDisplay();
+            } else if (tabName === 'vendor-history') {
+                renderVendorHistory();
+            }
+        }
+
+        // ===== แสดงรายการร้านอาหาร =====
+        function renderRestaurants() {
+            const container = document.getElementById('restaurantsContainer');
+            
+            // จัดกลุ่มร้านตามตึก
+            const grouped = {};
+            restaurants.forEach(rest => {
+                if (!grouped[rest.building]) grouped[rest.building] = [];
+                grouped[rest.building].push(rest);
+            });
+
+            let html = '';
+            Object.keys(grouped).sort().forEach(building => {
+                html += `<div style="grid-column: 1/-1; background: #667eea; color: white; padding: 15px; border-radius: 8px; margin-top: 10px; font-weight: bold; font-size: 1.2em;">🏢 ${building}</div>`;
+                
+                grouped[building].forEach(rest => {
+                    html += `
+                        <div class="restaurant">
+                            <h3>${rest.name}</h3>
+                            <div class="menu-items">
+                                ${rest.items.map((item) => `
+                                    <div class="menu-item">
+                                        <div>
+                                            <div class="item-name">${item.name}</div>
+                                        </div>
+                                        <div class="item-price">${item.price}฿</div>
+                                        <button class="btn-add" onclick="addToCart('${rest.name}', '${item.name}', ${item.price})">เพิ่ม</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ===== เพิ่มสินค้าลงตะกร้า =====
+        function addToCart(restaurant, item, price) {
+            const existing = cart.find(c => c.restaurant === restaurant && c.item === item);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ restaurant, item, price, qty: 1 });
+            }
+            updateCartDisplay();
+        }
+
+        // ===== ลบสินค้าจากตะกร้า =====
+        function removeFromCart(idx) {
+            cart.splice(idx, 1);
+            updateCartDisplay();
+        }
+
+        // ===== เปลี่ยนจำนวนสินค้า =====
+        function updateQuantity(idx, delta) {
+            cart[idx].qty += delta;
+            if (cart[idx].qty <= 0) {
+                removeFromCart(idx);
+            } else {
+                updateCartDisplay();
+            }
+        }
+
+        // ===== อัปเดตการแสดงตะกร้า =====
+        function updateCartDisplay() {
+            const cartItems = document.getElementById('cartItems');
+            const totalPrice = document.getElementById('totalPrice');
+            const orderBtn = document.getElementById('orderBtn');
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<div class="empty-message">ยังไม่มีการสั่งอาหาร</div>';
+                totalPrice.textContent = '0฿';
+                orderBtn.disabled = true;
+            } else {
+                let total = 0;
+                cartItems.innerHTML = cart.map((item, idx) => {
+                    const itemTotal = item.price * item.qty;
+                    total += itemTotal;
+                    return `
+                        <div class="cart-item">
+                            <div class="cart-item-header">
+                                <div>
+                                    <div class="restaurant-name">${item.restaurant}</div>
+                                    <div class="dish-name">${item.name}</div>
+                                </div>
+                                <div class="item-total">${itemTotal}฿</div>
+                            </div>
+                            <div class="item-controls">
+                                <div class="quantity-control">
+                                    <button onclick="updateQuantity(${idx}, -1)">−</button>
+                                    <span class="quantity-display">${item.qty}</span>
+                                    <button onclick="updateQuantity(${idx}, 1)">+</button>
+                                </div>
+                                <button class="btn-remove" onclick="removeFromCart(${idx})">ลบ</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                totalPrice.textContent = total + '฿';
+                orderBtn.disabled = false;
+            }
+        }
+
+        // ===== สั่งอาหาร =====
+        document.getElementById('orderBtn').addEventListener('click', () => {
+            if (cart.length === 0) return;
+
+            let total = 0;
+            const items = [];
+
+            cart.forEach(item => {
+                const itemTotal = item.price * item.qty;
+                total += itemTotal;
+                items.push({
+                    restaurant: item.restaurant,
+                    item: item.item,
+                    price: item.price,
+                    qty: item.qty,
+                    subtotal: itemTotal
+                });
+            });
+
+            const now = new Date();
+            const order = {
+                id: nextOrderId++,
+                items: items,
+                total: total,
+                status: 'pending',
+                time: now.toLocaleTimeString('th-TH'),
+                date: now.toLocaleDateString('th-TH'),
+                timestamp: now.getTime()
+            };
+
+            orders.unshift(order);
+            saveData();
+
+            let msg = '📋 รายการสั่งอาหาร\n' + '='.repeat(40) + '\n\n';
+            items.forEach(item => {
+                msg += `${item.restaurant}\n${item.item} × ${item.qty} = ${item.subtotal}฿\n\n`;
+            });
+            msg += '='.repeat(40) + '\n💰 ราคารวมทั้งสิ้น: ' + total + '฿\n' + '='.repeat(40);
+
+            alert(msg + '\n\n✅ สั่งอาหารสำเร็จ! #' + order.id);
+
+            cart = [];
+            updateCartDisplay();
+        });
+
+        // ===== แสดงประวัติการสั่งของลูกค้า =====
+        function renderCustomerHistory() {
+            const container = document.getElementById('customerHistoryList');
+
+            if (orders.length === 0) {
+                container.innerHTML = '<div class="empty-message">ยังไม่มีประวัติการสั่ง</div>';
+                return;
+            }
+
+            container.innerHTML = orders.map(order => {
+                const statusTexts = {
+                    'pending': 'รอดำเนินการ',
+                    'accepted': 'แม่ค้ารับออเดอร์',
+                    'preparing': 'กำลังทำ',
+                    'ready': 'พร้อมรับ',
+                    'picked': 'ลูกค้ารับไปแล้ว',
+                    'rejected': 'ถูกปฏิเสธ'
+                };
+
+                const statusClass = 'status-' + order.status;
+                const itemsHtml = order.items.map(item => `
+                    <div class="history-item">
+                        <div class="history-item-shop">🏪 ${item.restaurant}</div>
+                        <div class="history-item-detail">${item.item} × ${item.qty} = ${item.subtotal}฿</div>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="history-card">
+                        <div class="history-header">
+                            <div>
+                                <div class="order-id">ออเดอร์ #${order.id}</div>
+                                <div class="order-time">${order.date} ${order.time}</div>
+                            </div>
+                            <span class="status-badge ${statusClass}">${statusTexts[order.status]}</span>
+                        </div>
+                        <div class="history-items">
+                            ${itemsHtml}
+                        </div>
+                        <div class="history-total">💰 รวม: ${order.total}฿</div>
+                        <div class="history-actions">
+                            ${order.status === 'pending' ? `<button class="btn-cancel" onclick="cancelOrder(${order.id})">❌ ยกเลิกออเดอร์</button>` : ''}
+                            ${order.status !== 'picked' && order.status !== 'rejected' ? `<button class="btn-cancel" disabled style="background: #ccc; cursor: not-allowed;">ยกเลิกไม่ได้</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===== ยกเลิกออเดอร์ (เฉพาะสถานะ pending) =====
+        function cancelOrder(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (order && order.status === 'pending') {
+                if (confirm('ยกเลิกออเดอร์ #' + orderId + ' หรือไม่?')) {
+                    order.status = 'rejected';
+                    saveData();
+                    renderCustomerHistory();
+                    alert('✅ ยกเลิกออเดอร์แล้ว');
+                }
+            } else {
+                alert('❌ ยกเลิกไม่ได้ (แม่ค้ารับออเดอร์แล้ว)');
+            }
+        }
+
+        // ===== อัปเดตแสดงผลด้านแม่ค้า =====
+        function updateVendorDisplay() {
+            const activeOrders = orders.filter(o => !['picked', 'rejected'].includes(o.status));
+            const pending = activeOrders.filter(o => o.status === 'pending').length;
+            const preparing = activeOrders.filter(o => o.status === 'preparing').length;
+            const ready = activeOrders.filter(o => o.status === 'ready').length;
+
+            document.getElementById('statPending').textContent = pending;
+            document.getElementById('statPreparing').textContent = preparing;
+            document.getElementById('statReady').textContent = ready;
+
+            const container = document.getElementById('ordersContainer');
+
+            if (activeOrders.length === 0) {
+                container.innerHTML = '<div class="no-orders">ยังไม่มีออเดอร์ค้าง</div>';
+                return;
+            }
+
+            container.innerHTML = activeOrders.map(order => {
+                const statusTexts = {
+                    'pending': 'รอดำเนินการ',
+                    'accepted': 'รับแล้ว',
+                    'preparing': 'กำลังทำ',
+                    'ready': 'พร้อมรับ'
+                };
+
+                const itemsHtml = order.items.map(item => `
+                    <div class="order-item">
+                        <div style="font-weight: bold; color: #667eea;">🏪 ${item.restaurant}</div>
+                        <div class="order-item-detail">${item.item}</div>
+                        <div class="order-item-detail">จำนวน: ${item.qty} ชิ้น × ${item.price}฿ = ${item.subtotal}฿</div>
+                    </div>
+                `).join('');
+
+                let actionButtons = '';
+                if (order.status === 'pending') {
+                    actionButtons = `
+                        <button class="btn-status btn-accept" onclick="changeStatus(${order.id}, 'accepted')">✅ รับออเดอร์</button>
+                        <button class="btn-status btn-reject" onclick="rejectOrder(${order.id})">❌ ปฏิเสธ</button>
+                    `;
+                } else if (order.status === 'accepted') {
+                    actionButtons = `
+                        <button class="btn-status btn-preparing" onclick="changeStatus(${order.id}, 'preparing')">👨‍🍳 เริ่มทำ</button>
+                        <button class="btn-status btn-reject" onclick="rejectOrder(${order.id})">❌ ปฏิเสธ</button>
+                    `;
+                } else if (order.status === 'preparing') {
+                    actionButtons = `
+                        <button class="btn-status btn-ready" onclick="changeStatus(${order.id}, 'ready')">🎉 ทำเสร็จแล้ว</button>
+                        <button class="btn-status btn-reject" onclick="rejectOrder(${order.id})">❌ ปฏิเสธ</button>
+                    `;
+                } else if (order.status === 'ready') {
+                    actionButtons = `
+                        <button class="btn-status btn-picked" onclick="changeStatus(${order.id}, 'picked')">🎁 ลูกค้ารับไปแล้ว</button>
+                        <button class="btn-status btn-reject" onclick="rejectOrder(${order.id})">❌ ปฏิเสธ</button>
+                    `;
+                }
+
+                return `
+                    <div class="order-card ${order.status}">
+                        <div class="order-header">
+                            <div>
+                                <div class="order-id">ออเดอร์ #${order.id}</div>
+                                <div class="order-time">${order.time}</div>
+                            </div>
+                            <span class="status-badge status-${order.status}">${statusTexts[order.status]}</span>
+                        </div>
+                        <div class="order-items">
+                            ${itemsHtml}
+                        </div>
+                        <div class="order-total">💰 รวม: ${order.total}฿</div>
+                        <div class="order-actions">
+                            ${actionButtons}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===== เปลี่ยนสถานะออเดอร์ =====
+        function changeStatus(orderId, newStatus) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = newStatus;
+                saveData();
+                updateVendorDisplay();
+            }
+        }
+
+        // ===== ปฏิเสธออเดอร์ =====
+        function rejectOrder(orderId) {
+            if (confirm('ปฏิเสธออเดอร์ #' + orderId + ' หรือไม่?')) {
+                const order = orders.find(o => o.id === orderId);
+                if (order) {
+                    order.status = 'rejected';
+                    saveData();
+                    updateVendorDisplay();
+                    alert('✅ ปฏิเสธออเดอร์แล้ว');
+                }
+            }
+        }
+
+        // ===== แสดงประวัติแม่ค้า =====
+        function renderVendorHistory() {
+            const container = document.getElementById('vendorHistoryList');
+            const historyOrders = orders.filter(o => ['picked', 'rejected'].includes(o.status));
+
+            if (historyOrders.length === 0) {
+                container.innerHTML = '<div class="empty-message">ยังไม่มีประวัติ</div>';
+                return;
+            }
+
+            container.innerHTML = historyOrders.map(order => {
+                const statusTexts = {
+                    'picked': 'ลูกค้ารับไปแล้ว',
+                    'rejected': 'ถูกปฏิเสธ'
+                };
+
+                const itemsHtml = order.items.map(item => `
+                    <div class="history-item">
+                        <div class="history-item-shop">🏪 ${item.restaurant}</div>
+                        <div class="history-item-detail">${item.item} × ${item.qty} = ${item.subtotal}฿</div>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="history-card">
+                        <div class="history-header">
+                            <div>
+                                <div class="order-id">ออเดอร์ #${order.id}</div>
+                                <div class="order-time">${order.date} ${order.time}</div>
+                            </div>
+                            <span class="status-badge status-${order.status}">${statusTexts[order.status]}</span>
+                        </div>
+                        <div class="history-items">
+                            ${itemsHtml}
+                        </div>
+                        <div class="history-total">💰 รวม: ${order.total}฿</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===== ล้างออเดอร์ทั้งหมด =====
+        function clearAllOrders() {
+            if (confirm('ล้างออเดอร์ทั้งหมดหรือไม่?')) {
+                orders = [];
+                nextOrderId = 1001;
+                saveData();
+                updateVendorDisplay();
+                alert('✅ ล้างข้อมูลแล้ว');
+            }
+        }
+
+        // ===== เมื่อเปิดหน้าเว็บ =====
+        window.addEventListener('load', () => {
+            loadData();
+            renderRestaurants();
+        });
+    </script>
+</body>
+</html>
